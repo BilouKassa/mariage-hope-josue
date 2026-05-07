@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invitation — Mariage Hope & Josué Exode</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;min-height:100%;overflow-x:hidden;background:#07101e}
+body{font-family:'Cormorant Garamond',Georgia,serif;display:flex;flex-direction:column;align-items:center}
+
+/* ── CANVAS PARTICULES ── */
+#cvs{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ── SCÈNE ENVELOPPE ── */
+#stage{
+  position:relative;z-index:10;
+  width:100%;max-width:480px;
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:40px 20px;
+}
+
+/* ── TITRE ── */
+.stage-title{
+  text-align:center;margin-bottom:36px;
+  opacity:0;animation:fadeD 0.8s ease 0.4s forwards;
+}
+@keyframes fadeD{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:translateY(0)}}
+.stage-title span{display:block;font-size:10px;letter-spacing:6px;text-transform:uppercase;color:rgba(201,168,76,0.7);margin-bottom:8px}
+.stage-title h1{font-family:'Playfair Display',serif;font-size:26px;color:#eef4ff;font-weight:400}
+
+/* ── CONTENEUR ENVELOPPE ── */
+#env-container{
+  width:360px;height:260px;
+  position:relative;
+  cursor:pointer;
+  opacity:0;
+  animation:envAppear 1s cubic-bezier(0.22,1,0.36,1) 0.8s forwards;
+}
+@media(max-width:420px){#env-container{width:300px;height:216px}}
+@keyframes envAppear{
+  0%{opacity:0;transform:translateY(30px) scale(0.92)}
+  60%{transform:translateY(-6px) scale(1.02)}
+  100%{opacity:1;transform:translateY(0) scale(1)}
+}
+
+/* ── ENVELOPPE CSS PURE ── */
+.env{
+  width:100%;height:100%;
+  position:relative;
+  filter:drop-shadow(0 20px 60px rgba(0,0,0,0.7)) drop-shadow(0 0 40px rgba(201,168,76,0.08));
+  transition:filter 0.3s;
+}
+.env:hover{filter:drop-shadow(0 24px 70px rgba(0,0,0,0.75)) drop-shadow(0 0 50px rgba(201,168,76,0.15))}
+
+/* Corps principal */
+.env-body{
+  position:absolute;inset:0;border-radius:4px;overflow:hidden;
+  background:linear-gradient(155deg,#1d3a6a 0%,#132848 45%,#0c1e3c 100%);
+  border:1px solid rgba(201,168,76,0.55);
+}
+/* Texture fond */
+.env-body::before{
+  content:'';position:absolute;inset:0;
+  background:
+    repeating-linear-gradient(45deg,rgba(201,168,76,0.025) 0,rgba(201,168,76,0.025) 1px,transparent 0,transparent 22px),
+    repeating-linear-gradient(-45deg,rgba(201,168,76,0.015) 0,rgba(201,168,76,0.015) 1px,transparent 0,transparent 22px);
+}
+/* Bord intérieur */
+.env-body::after{
+  content:'';position:absolute;
+  inset:10px;border:0.5px solid rgba(201,168,76,0.15);border-radius:2px;
+}
+
+/* Triangles plis côtés */
+.env-left,.env-right{
+  position:absolute;top:0;bottom:0;z-index:2;pointer-events:none;
+}
+.env-left{
+  left:0;width:55%;
+  background:linear-gradient(to right bottom,rgba(8,18,38,0.55) 50%,transparent 50%);
+}
+.env-right{
+  right:0;width:55%;
+  background:linear-gradient(to left bottom,rgba(8,18,38,0.45) 50%,transparent 50%);
+}
+/* Lignes de pli */
+.env-left::after,.env-right::after{
+  content:'';position:absolute;
+  top:0;bottom:0;
+}
+.env-left::after{
+  right:0;width:1px;
+  background:linear-gradient(180deg,transparent,rgba(201,168,76,0.25) 30%,rgba(201,168,76,0.35) 50%,rgba(201,168,76,0.25) 70%,transparent);
+}
+.env-right::after{
+  left:0;width:1px;
+  background:linear-gradient(180deg,transparent,rgba(201,168,76,0.2) 30%,rgba(201,168,76,0.3) 50%,rgba(201,168,76,0.2) 70%,transparent);
+}
+
+/* Triangle bas */
+.env-bottom{
+  position:absolute;bottom:0;left:0;right:0;
+  height:54%;z-index:2;pointer-events:none;
+  overflow:hidden;
+}
+.env-bottom::before{
+  content:'';position:absolute;
+  bottom:0;left:-2%;width:104%;height:200%;
+  background:linear-gradient(175deg,rgba(10,20,42,0.6) 48%,transparent 52%);
+  clip-path:polygon(0 100%,50% 0%,100% 100%);
+}
+.env-bottom::after{
+  content:'';position:absolute;
+  bottom:0;left:0;right:0;height:100%;
+  background:transparent;
+  clip-path:polygon(0 100%,50% 0%,100% 100%);
+  border-left:1px solid rgba(201,168,76,0.18);
+  border-right:1px solid rgba(201,168,76,0.18);
+}
+
+/* Monogramme central */
+.env-mono{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-42%);
+  text-align:center;z-index:3;pointer-events:none;
+}
+.env-mono-big{
+  font-family:'Playfair Display',serif;
+  font-size:56px;font-weight:600;
+  color:rgba(201,168,76,0.14);
+  line-height:1;letter-spacing:3px;
+  text-shadow:0 0 30px rgba(201,168,76,0.1);
+}
+.env-mono-sub{
+  font-size:9px;letter-spacing:5px;text-transform:uppercase;
+  color:rgba(201,168,76,0.2);margin-top:6px;
+}
+
+/* ── RABAT HAUT (flap) ── */
+#flap{
+  position:absolute;top:0;left:-1px;right:-1px;
+  height:54%;
+  transform-origin:top center;
+  z-index:8;
+  overflow:hidden;
+  pointer-events:none;
+  /* État fermé par défaut */
+  transform:rotateX(0deg);
+  transition:transform 0s; /* géré en JS */
+  transform-style:preserve-3d;
+}
+.flap-face{
+  position:absolute;inset:0;overflow:hidden;
+}
+/* Triangle du rabat */
+.flap-face::before{
+  content:'';position:absolute;
+  top:0;left:-3%;width:106%;height:200%;
+  background:linear-gradient(175deg,#1c3868 0%,#142d58 35%,#0e2248 70%,#0a1a3a 100%);
+  clip-path:polygon(0 0,50% 100%,100% 0);
+}
+/* Bord doré bas du flap */
+.flap-face::after{
+  content:'';position:absolute;
+  top:0;left:-3%;width:106%;height:200%;
+  clip-path:polygon(0 0,50% 100%,100% 0);
+  border-bottom:1.5px solid rgba(201,168,76,0.5);
+}
+/* Ombre sous le flap quand fermé */
+.flap-shadow{
+  position:absolute;
+  top:46%;left:5%;right:5%;height:12px;
+  background:rgba(0,0,0,0.3);
+  filter:blur(8px);
+  z-index:7;pointer-events:none;
+  transition:opacity 0.5s;
+}
+
+/* ── SCEAU DE CIRE ── */
+#seal{
+  position:absolute;
+  top:46%;left:50%;
+  transform:translate(-50%,-50%);
+  width:58px;height:58px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#e8952e,#b85a18);
+  border:2px solid #c9a84c;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:
+    0 4px 20px rgba(192,114,42,0.55),
+    0 0 0 4px rgba(201,168,76,0.1),
+    inset 0 1px 2px rgba(255,255,255,0.15);
+  z-index:9;
+  transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1),opacity 0.35s;
+}
+#seal::before{
+  content:'';position:absolute;
+  top:7px;left:10px;width:18px;height:8px;
+  background:rgba(255,255,255,0.18);border-radius:50%;
+  transform:rotate(-25deg);
+}
+#seal.hide{transform:translate(-50%,-50%) scale(0) rotate(45deg);opacity:0}
+#seal-inner{z-index:1;position:relative}
+
+/* ── HINT CLIC ── */
+#hint{
+  margin-top:24px;
+  opacity:0;animation:hintIn 0.6s ease 1.8s forwards;
+  text-align:center;pointer-events:none;
+}
+@keyframes hintIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.hint-txt{
+  font-size:10px;letter-spacing:5px;text-transform:uppercase;
+  color:rgba(201,168,76,0.65);
+  display:inline-flex;align-items:center;gap:10px;
+  animation:hintPulse 2s ease-in-out 2.5s infinite;
+}
+@keyframes hintPulse{0%,100%{opacity:0.45;transform:translateY(0)}50%{opacity:1;transform:translateY(-4px)}}
+.hint-dot{
+  width:28px;height:28px;border-radius:50%;
+  border:1px solid rgba(201,168,76,0.4);
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* ── BARRE PROGRESSION ── */
+#pbar-wrap{
+  width:220px;margin-top:18px;
+  display:none;
+}
+#pbar-bg{height:1px;background:rgba(201,168,76,0.15);border-radius:1px;overflow:hidden}
+#pbar-fill{height:100%;width:0%;background:linear-gradient(90deg,#c0722a,#c9a84c,#e8c46a);transition:width 0.08s linear}
+#pbar-lbl{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:rgba(201,168,76,0.45);margin-top:8px;text-align:center;min-height:16px}
+
+/* ═══════════════════════════
+   CARTE INVITATION
+═══════════════════════════ */
+#card-section{
+  display:none;
+  position:relative;z-index:5;
+  width:100%;max-width:560px;
+  padding:0 16px 80px;
+}
+
+/* La carte tourne avant de s'afficher */
+.card-spin-reveal{
+  animation:cardSpin 1.4s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+@keyframes cardSpin{
+  0%  {opacity:0;transform:perspective(900px) rotateY(-180deg) scale(0.7)}
+  40% {opacity:0.8;transform:perspective(900px) rotateY(-40deg) scale(1.04)}
+  65% {transform:perspective(900px) rotateY(12deg) scale(0.98)}
+  82% {transform:perspective(900px) rotateY(-5deg) scale(1.01)}
+  100%{opacity:1;transform:perspective(900px) rotateY(0deg) scale(1)}
+}
+
+.inv-card{
+  background:linear-gradient(165deg,#0f1e3a 0%,#0b1628 60%,#071020 100%);
+  border:1px solid rgba(201,168,76,0.5);
+  border-radius:4px;overflow:hidden;
+  box-shadow:0 30px 100px rgba(0,0,0,0.8),0 0 60px rgba(201,168,76,0.07);
+  padding:14px;
+}
+/* Décor fond */
+.inv-card::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(circle at 15% 15%,rgba(201,168,76,0.05) 0,transparent 35%),
+    radial-gradient(circle at 85% 85%,rgba(192,114,42,0.05) 0,transparent 35%),
+    radial-gradient(circle at 50% 50%,rgba(26,58,110,0.07) 0,transparent 60%);
+}
+
+.stripe{height:6px;background:linear-gradient(90deg,#071020 0%,#c0722a 16%,#c9a84c 33%,#e8c46a 50%,#c9a84c 67%,#c0722a 84%,#071020 100%)}
+
+/* Coins */
+.cc{position:absolute;width:96px;height:96px;top:6px;pointer-events:none;z-index:2}
+.cc-l{left:0}.cc-r{right:0;transform:scaleX(-1)}
+
+/* Cadre */
+.card-frame{
+  border:0.5px solid rgba(201,168,76,0.18);border-radius:2px;
+  padding:30px 38px 38px;position:relative;z-index:1;margin:8px 4px 4px;
+}
+@media(max-width:480px){.card-frame{padding:22px 16px 30px}}
+
+/* Alliances */
+.rings-wrap{text-align:center;margin-bottom:18px}
+.rings-svg{
+  filter:drop-shadow(0 4px 18px rgba(201,168,76,0.4));
+  animation:ringsFloat 4s ease-in-out infinite;
+}
+@keyframes ringsFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+/* Croix halo */
+.cross-halo{
+  width:64px;height:64px;border-radius:50%;
+  border:1px solid rgba(201,168,76,0.2);
+  display:inline-flex;align-items:center;justify-content:center;
+  position:relative;margin:0 auto 18px;
+  animation:haloPulse 3s ease-in-out infinite;
+}
+@keyframes haloPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,0.2),0 0 0 6px rgba(201,168,76,0.06)}
+  50%{box-shadow:0 0 0 10px rgba(201,168,76,0.08),0 0 0 20px rgba(201,168,76,0.03)}
+}
+.cx{text-align:center}
+
+/* Labels */
+.lbl{text-align:center;font-size:10px;letter-spacing:6px;text-transform:uppercase;color:#c9a84c;font-weight:300;margin-bottom:20px}
+
+/* Verset */
+.vrs{
+  text-align:center;border:0.5px solid rgba(201,168,76,0.18);border-radius:2px;
+  padding:14px 22px;background:rgba(201,168,76,0.04);margin-bottom:26px;
+  position:relative;overflow:hidden;
+}
+.vrs::after{content:'';position:absolute;left:-100%;top:0;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(201,168,76,0.08),transparent);animation:shim 4s ease-in-out infinite}
+@keyframes shim{0%{left:-100%}100%{left:200%}}
+.vrs p{font-style:italic;font-size:14px;color:#e8c46a;line-height:1.85;position:relative;z-index:1}
+.vrs span{font-size:10px;letter-spacing:2px;color:#c9a84c;opacity:0.6;display:block;margin-top:5px;position:relative;z-index:1}
+
+/* Formule */
+.fml{text-align:center;font-size:15px;color:#b8cce8;line-height:2.1;font-style:italic;font-weight:300;margin-bottom:26px}
+
+/* Séparateur */
+.sep{display:flex;align-items:center;gap:14px;margin:20px 0}
+.sep::before,.sep::after{content:'';flex:1;height:0.5px;background:linear-gradient(90deg,transparent,rgba(201,168,76,0.4),transparent)}
+.sep span{color:#c9a84c;font-size:12px;letter-spacing:8px;animation:spk 2s ease-in-out infinite alternate}
+@keyframes spk{from{text-shadow:0 0 4px rgba(201,168,76,0.2)}to{text-shadow:0 0 16px rgba(201,168,76,1),0 0 28px rgba(201,168,76,0.4)}}
+
+/* Noms */
+.nms{text-align:center;margin-bottom:24px}
+.nm{
+  font-family:'Playfair Display',serif;font-size:60px;font-weight:600;
+  line-height:1;display:block;letter-spacing:2px;
+  background:linear-gradient(120deg,#b8943a,#f7edba,#c9a84c,#ffe88a,#b8943a);
+  background-size:250% auto;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:shine 5s linear infinite;
+}
+@keyframes shine{0%{background-position:0% center}100%{background-position:250% center}}
+@media(max-width:400px){.nm{font-size:46px}}
+.amp{font-family:'Playfair Display',serif;font-style:italic;font-size:30px;color:#c0722a;display:block;margin:7px 0}
+.fam{font-size:11px;letter-spacing:9px;text-transform:uppercase;color:rgba(201,168,76,0.45);margin-top:12px;display:block}
+
+/* Poème */
+.poe{text-align:center;font-style:italic;font-size:15.5px;color:#b8cce8;line-height:2.3;font-weight:300}
+
+/* Dates */
+.dts{display:flex;gap:14px;margin:28px 0}
+.dc{
+  flex:1;background:rgba(5,12,26,0.7);
+  border:0.5px solid rgba(201,168,76,0.3);border-radius:3px;
+  padding:18px 10px 16px;text-align:center;
+  position:relative;overflow:hidden;
+  transition:transform 0.3s,border-color 0.3s,box-shadow 0.3s;
+}
+.dc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#c0722a,#c9a84c,#c0722a,transparent)}
+.dc:hover{transform:translateY(-5px);border-color:rgba(201,168,76,0.65);box-shadow:0 12px 32px rgba(0,0,0,0.5),0 0 20px rgba(201,168,76,0.08)}
+.dt{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#c9a84c;margin-bottom:9px;display:block}
+.dn{font-family:'Playfair Display',serif;font-size:48px;font-weight:600;color:#eef4ff;line-height:1;display:block}
+.dm{font-size:10.5px;letter-spacing:4px;text-transform:uppercase;color:#b8cce8;margin-top:6px;display:block}
+.da{font-size:10px;color:rgba(201,168,76,0.45);margin-top:2px;display:block}
+.de{font-size:10.5px;color:#e8952e;margin-top:9px;font-style:italic;display:block}
+@media(max-width:400px){.dn{font-size:36px}}
+
+/* Lieu */
+.lieu{
+  border:0.5px solid rgba(201,168,76,0.22);background:rgba(201,168,76,0.04);
+  border-radius:3px;padding:16px 22px;text-align:center;margin-bottom:20px;
+  position:relative;overflow:hidden;transition:border-color 0.3s;
+}
+.lieu:hover{border-color:rgba(201,168,76,0.45)}
+.lieu::after{content:'';position:absolute;left:-100%;top:0;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(201,168,76,0.06),transparent);animation:shim 5s ease-in-out 2.5s infinite}
+.ll{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:#c9a84c;margin-bottom:7px;display:block}
+.ln{font-family:'Playfair Display',serif;font-size:19px;color:#eef4ff;margin-bottom:3px}
+.ls{font-size:12px;color:#7090b8;font-style:italic}
+
+/* Bénédiction */
+.ble{text-align:center;font-style:italic;font-size:15.5px;color:#b8cce8;line-height:2.1;font-weight:300;margin-bottom:10px}
+.par{text-align:center;font-size:12px;color:rgba(201,168,76,0.6);font-style:italic;margin-bottom:24px}
+
+/* Contact */
+.cts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:6px}
+.cp{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(5,12,26,0.7);border:0.5px solid rgba(201,168,76,0.22);
+  border-radius:40px;padding:10px 22px;
+  font-size:14px;color:#b8cce8;text-decoration:none;
+  font-family:'Cormorant Garamond',serif;transition:all 0.25s;
+}
+.cp:hover{border-color:#c9a84c;color:#eef4ff;transform:translateY(-2px)}
+
+/* QR */
+.qr-sec{
+  margin-top:28px;padding-top:24px;
+  border-top:0.5px solid rgba(201,168,76,0.16);
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+}
+.ql{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:#c9a84c;text-align:center}
+.qf{
+  background:#fff;border-radius:4px;padding:10px;
+  border:2px solid rgba(201,168,76,0.4);
+  animation:qglow 3s ease-in-out infinite alternate;
+}
+@keyframes qglow{from{box-shadow:0 0 18px rgba(201,168,76,0.08)}to{box-shadow:0 0 38px rgba(201,168,76,0.2)}}
+.qs{font-size:11.5px;color:#7090b8;font-style:italic;text-align:center;line-height:1.75}
+
+/* Bouton RSVP */
+.rw{margin-top:28px;text-align:center}
+.rc{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:16px 40px;
+  background:linear-gradient(120deg,#c0722a,#c9a84c 50%,#e8952e);
+  background-size:200% auto;
+  border:none;border-radius:2px;
+  font-family:'Playfair Display',serif;font-size:13px;
+  letter-spacing:4px;text-transform:uppercase;color:#07101e;
+  font-weight:700;text-decoration:none;cursor:pointer;
+  transition:background-position 0.4s,transform 0.15s,box-shadow 0.3s;
+  position:relative;overflow:hidden;
+}
+.rc::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.28),transparent);transform:translateX(-100%);transition:transform 0.5s}
+.rc:hover{background-position:right center;box-shadow:0 8px 28px rgba(201,168,76,0.35);transform:translateY(-2px)}
+.rc:hover::before{transform:translateX(100%)}
+
+/* Bas carte */
+.corn{text-align:center;color:#c9a84c;font-size:12px;letter-spacing:12px;padding:20px 0 24px;opacity:0.4;animation:spk 2.5s ease-in-out infinite alternate}
+</style>
+</head>
+<body>
+<canvas id="cvs"></canvas>
+
+<!-- ═══ SCÈNE ENVELOPPE ═══ -->
+<div id="stage">
+  <div class="stage-title">
+    <span>Carte d'invitation</span>
+    <h1>Hope &amp; Josué Exode</h1>
+  </div>
+
+  <div id="env-container" onclick="lancerAnimation()">
+    <div class="env">
+      <!-- Corps -->
+      <div class="env-body">
+        <div class="env-left"></div>
+        <div class="env-right"></div>
+        <div class="env-bottom"></div>
+        <div class="env-mono">
+          <div class="env-mono-big">H&amp;J</div>
+          <div class="env-mono-sub">Exode · Décembre 2026</div>
+        </div>
+      </div>
+
+      <!-- Rabat haut -->
+      <div id="flap">
+        <div class="flap-face"></div>
+      </div>
+      <div class="flap-shadow" id="flap-shadow"></div>
+
+      <!-- Sceau -->
+      <div id="seal">
+        <div id="seal-inner">
+          <svg width="26" height="32" viewBox="0 0 26 32" fill="none">
+            <defs><linearGradient id="sg" x1="0" y1="0" x2="26" y2="32" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#f7edba"/><stop offset="100%" stop-color="#c9a84c"/></linearGradient></defs>
+            <rect x="10.5" y="0" width="5" height="32" rx="1.5" fill="url(#sg)"/>
+            <rect x="0" y="9" width="26" height="5" rx="1.5" fill="url(#sg)"/>
+            <circle cx="13" cy="11.5" r="2.8" fill="#a04e10"/>
+            <circle cx="13" cy="11.5" r="1.1" fill="#f7edba" opacity="0.7"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hint & Progress -->
+  <div id="hint">
+    <div class="hint-txt">
+      <div class="hint-dot">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#c9a84c" stroke-width="1.5"><path d="M6 2v8M3 7l3 3 3-3"/></svg>
+      </div>
+      Cliquez pour ouvrir
+    </div>
+  </div>
+  <div id="pbar-wrap">
+    <div id="pbar-bg"><div id="pbar-fill"></div></div>
+    <div id="pbar-lbl"></div>
+  </div>
+</div>
+
+<!-- ═══ CARTE ═══ -->
+<div id="card-section">
+  <div class="inv-card card-spin-reveal">
+    <div class="stripe"></div>
+
+    <!-- Coins décoratifs -->
+    <svg class="cc cc-l" viewBox="0 0 96 96" fill="none">
+      <path d="M0 0 L60 0 L60 4 L4 4 L4 60 L0 60Z" fill="#c9a84c" opacity="0.48"/>
+      <path d="M0 0 L36 0 L36 2 L2 2 L2 36 L0 36Z" fill="#c9a84c" opacity="0.2"/>
+      <circle cx="11" cy="11" r="4" fill="#c9a84c" opacity="0.4"/>
+      <circle cx="11" cy="11" r="1.6" fill="#c9a84c" opacity="0.95"/>
+      <line x1="21" y1="4" x2="21" y2="8" stroke="#c9a84c" stroke-width="0.8" opacity="0.28"/>
+      <line x1="4" y1="21" x2="8" y2="21" stroke="#c9a84c" stroke-width="0.8" opacity="0.28"/>
+    </svg>
+    <svg class="cc cc-r" viewBox="0 0 96 96" fill="none">
+      <path d="M0 0 L60 0 L60 4 L4 4 L4 60 L0 60Z" fill="#c9a84c" opacity="0.48"/>
+      <path d="M0 0 L36 0 L36 2 L2 2 L2 36 L0 36Z" fill="#c9a84c" opacity="0.2"/>
+      <circle cx="11" cy="11" r="4" fill="#c9a84c" opacity="0.4"/>
+      <circle cx="11" cy="11" r="1.6" fill="#c9a84c" opacity="0.95"/>
+    </svg>
+
+    <div class="card-frame">
+
+      <!-- ALLIANCES -->
+      <div class="rings-wrap">
+        <svg class="rings-svg" width="130" height="65" viewBox="0 0 130 65" fill="none">
+          <defs>
+            <linearGradient id="rg1" x1="0" y1="0" x2="65" y2="65" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#f7edba"/>
+              <stop offset="28%" stop-color="#c9a84c"/>
+              <stop offset="58%" stop-color="#e8c46a"/>
+              <stop offset="100%" stop-color="#9a7830"/>
+            </linearGradient>
+            <linearGradient id="rg2" x1="65" y1="0" x2="130" y2="65" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#9a7830"/>
+              <stop offset="38%" stop-color="#e8c46a"/>
+              <stop offset="68%" stop-color="#c9a84c"/>
+              <stop offset="100%" stop-color="#f7edba"/>
+            </linearGradient>
+            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="2.5" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <!-- Alliance gauche -->
+          <circle cx="46" cy="32" r="24" stroke="url(#rg1)" stroke-width="5.5" fill="none" filter="url(#glow)"/>
+          <circle cx="46" cy="32" r="24" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" fill="none"/>
+          <path d="M28 18 A24 24 0 0 1 64 18" stroke="rgba(255,255,255,0.28)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <!-- Alliance droite -->
+          <circle cx="84" cy="32" r="24" stroke="url(#rg2)" stroke-width="5.5" fill="none" filter="url(#glow)"/>
+          <circle cx="84" cy="32" r="24" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" fill="none"/>
+          <path d="M66 18 A24 24 0 0 1 102 18" stroke="rgba(255,255,255,0.28)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <!-- Diamant central entre les alliances -->
+          <polygon points="65,21 68.5,32 65,43 61.5,32" fill="#f7edba" opacity="0.92" filter="url(#glow)"/>
+          <polygon points="65,21 68.5,32 65,43 61.5,32" fill="none" stroke="rgba(201,168,76,0.6)" stroke-width="0.5"/>
+          <!-- Éclats lumineux -->
+          <line x1="65" y1="17" x2="65" y2="14" stroke="#f7edba" stroke-width="1.2" opacity="0.65" stroke-linecap="round"/>
+          <line x1="70" y1="19" x2="72" y2="16.5" stroke="#f7edba" stroke-width="1" opacity="0.5" stroke-linecap="round"/>
+          <line x1="60" y1="19" x2="58" y2="16.5" stroke="#f7edba" stroke-width="1" opacity="0.5" stroke-linecap="round"/>
+          <line x1="70" y1="26" x2="73" y2="25" stroke="#f7edba" stroke-width="0.8" opacity="0.35" stroke-linecap="round"/>
+          <line x1="60" y1="26" x2="57" y2="25" stroke="#f7edba" stroke-width="0.8" opacity="0.35" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <!-- Croix -->
+      <div class="cx">
+        <div class="cross-halo">
+          <svg width="34" height="40" viewBox="0 0 34 40" fill="none">
+            <defs><linearGradient id="cg" x1="0" y1="0" x2="34" y2="40" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#c0722a"/><stop offset="45%" stop-color="#f0d870"/><stop offset="100%" stop-color="#c0722a"/></linearGradient></defs>
+            <rect x="14.5" y="0" width="5" height="40" rx="2" fill="url(#cg)"/>
+            <rect x="0" y="12" width="34" height="5" rx="2" fill="url(#cg)"/>
+            <circle cx="17" cy="14.5" r="3.2" fill="#0b1628"/>
+            <circle cx="17" cy="14.5" r="1.3" fill="#c9a84c" opacity="0.7"/>
+          </svg>
+        </div>
+      </div>
+
+      <p class="lbl">— Invitation au mariage —</p>
+
+      <div class="vrs">
+        <p>« Où tu iras j'irai, où tu demeureras je demeurerai ; ton peuple sera mon peuple, et ton Dieu sera mon Dieu. »</p>
+        <span>Ruth 1 : 16-17</span>
+      </div>
+
+      <p class="fml">
+        Ont l'immense joie de vous convier<br>
+        à la célébration de leur union sacrée,<br>
+        <em>portés par la grâce divine et l'amour.</em>
+      </p>
+
+      <div class="sep"><span>✦ ✦ ✦</span></div>
+
+      <div class="nms">
+        <span class="nm">Hope</span>
+        <span class="amp">&amp;</span>
+        <span class="nm">Josué</span>
+        <span class="fam">Exode</span>
+      </div>
+
+      <div class="sep"><span>✦ ✦ ✦</span></div>
+
+      <div class="poe">
+        Deux destinées unies,<br>
+        une promesse scellée pour l'éternité,<br>
+        un amour qui s'écrit sous le regard de Dieu.
+      </div>
+
+      <div class="dts">
+        <div class="dc">
+          <span class="dt">Cérémonie religieuse</span>
+          <span class="dn">17</span>
+          <span class="dm">Décembre</span>
+          <span class="da">2026</span>
+          <span class="de">Mariage coutumier</span>
+        </div>
+        <div class="dc">
+          <span class="dt">Réception &amp; Fête</span>
+          <span class="dn">19</span>
+          <span class="dm">Décembre</span>
+          <span class="da">2026</span>
+          <span class="de">Mariage civil</span>
+        </div>
+      </div>
+
+      <div class="lieu">
+        <span class="ll">Lieu de la célébration</span>
+        <div class="ln">Libreville, Gabon</div>
+        <div class="ls">Lieu exact communiqué ultérieurement</div>
+      </div>
+
+      <p class="ble">
+        Votre présence sera pour eux un honneur<br>
+        et une bénédiction inestimable.
+      </p>
+      <p class="par">Votre participation multiforme sera la bienvenue.</p>
+
+      <div class="cts">
+        <a class="cp" href="tel:+24176379681">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="#c9a84c" stroke-width="1.4"><path d="M3 5a2 2 0 012-2h2l2 4-1.5 1.5a11 11 0 005 5L14 12l4 2v2a2 2 0 01-2 2A15 15 0 013 5z"/></svg>
+          Josué — 076 37 96 81
+        </a>
+        <a class="cp" href="tel:+24174000556">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="#c9a84c" stroke-width="1.4"><path d="M3 5a2 2 0 012-2h2l2 4-1.5 1.5a11 11 0 005 5L14 12l4 2v2a2 2 0 01-2 2A15 15 0 013 5z"/></svg>
+          Hope — 074 00 05 56
+        </a>
+      </div>
+
+      <!-- QR -->
+      <div class="qr-sec">
+        <span class="ql">Scannez pour confirmer votre présence</span>
+        <div class="qf"><div id="qrcode"></div></div>
+        <p class="qs">Ce QR code vous redirige vers le faire-part digital<br>pour confirmer votre présence en ligne</p>
+      </div>
+
+      <!-- RSVP -->
+      <div class="rw">
+        <a class="rc" href="https://BilouKassa.github.io/mariage-hope-josue" target="_blank">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-2M13 3h4m0 0v4m0-4L9 11"/></svg>
+          Confirmer ma présence
+        </a>
+      </div>
+
+    </div><!-- card-frame -->
+    <div class="corn">✦ ✦ ✦</div>
+    <div class="stripe"></div>
+  </div>
+</div>
+
+<script>
+/* ── PARTICULES ── */
+(function(){
+  var c=document.getElementById('cvs'),ctx=c.getContext('2d'),pts=[];
+  function rs(){c.width=window.innerWidth;c.height=window.innerHeight}
+  rs();window.addEventListener('resize',rs);
+  function mk(){return{x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.6+0.3,vx:(Math.random()-0.5)*0.2,vy:-(Math.random()*0.4+0.08),op:Math.random()*0.5+0.1,fade:Math.random()*0.003+0.001,g:Math.random()>0.45}}
+  for(var i=0;i<130;i++)pts.push(mk());
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    pts.forEach(function(p,i){
+      p.x+=p.vx;p.y+=p.vy;p.op-=p.fade;
+      if(p.op<=0||p.y<-10){pts[i]=mk();pts[i].y=c.height+5;return}
+      ctx.save();ctx.globalAlpha=p.op;
+      ctx.fillStyle=p.g?'#c9a84c':'#fff';
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();
+      ctx.restore();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ── ANIMATION ENVELOPPE ── */
+var animDone=false;
+
+function lancerAnimation(){
+  if(animDone)return;
+  animDone=true;
+
+  // Cache hint
+  document.getElementById('hint').style.display='none';
+  // Affiche barre
+  var pb=document.getElementById('pbar-wrap');
+  var pf=document.getElementById('pbar-fill');
+  var pl=document.getElementById('pbar-lbl');
+  pb.style.display='block';
+
+  // ÉTAPE 1 : légère avancée vers l'utilisateur
+  pl.textContent='Préparation…';
+  var env=document.getElementById('env-container');
+  env.style.transition='transform 0.5s cubic-bezier(0.22,1,0.36,1)';
+  env.style.transform='scale(1.06) translateY(-8px)';
+  animPbar(pf,0,20,500);
+
+  // ÉTAPE 2 (600ms) : ouverture du rabat
+  setTimeout(function(){
+    pl.textContent='Ouverture du sceau…';
+    // Sceau disparaît
+    document.getElementById('seal').classList.add('hide');
+    document.getElementById('flap-shadow').style.opacity='0';
+    animPbar(pf,20,55,700);
+
+    // Rotation du flap avec CSS transform
+    var flap=document.getElementById('flap');
+    flap.style.transition='transform 0.9s cubic-bezier(0.4,0,0.2,1)';
+    flap.style.transformStyle='preserve-3d';
+    flap.style.transform='perspective(600px) rotateX(-175deg)';
+  },600);
+
+  // ÉTAPE 3 (1700ms) : carte sort de l'enveloppe
+  setTimeout(function(){
+    pl.textContent='La carte sort de l\'enveloppe…';
+    animPbar(pf,55,80,600);
+
+    // Enveloppe s'ouvre vers le bas + s'efface
+    env.style.transition='transform 0.8s cubic-bezier(0.4,0,0.2,1), opacity 0.6s ease';
+    env.style.transform='scale(1.1) translateY(20px)';
+    setTimeout(function(){
+      env.style.opacity='0';
+    },200);
+  },1700);
+
+  // ÉTAPE 4 (2500ms) : carte tourne et apparaît
+  setTimeout(function(){
+    pl.textContent='Votre invitation ✦';
+    animPbar(pf,80,100,800);
+
+    // Cache la scène, affiche la carte
+    var stage=document.getElementById('stage');
+    var cs=document.getElementById('card-section');
+    cs.style.display='block';
+    cs.scrollIntoView({behavior:'smooth',block:'start'});
+
+    setTimeout(function(){
+      stage.style.transition='opacity 0.5s';
+      stage.style.opacity='0';
+      setTimeout(function(){stage.style.display='none'},500);
+      pb.style.transition='opacity 0.4s';
+      pb.style.opacity='0';
+    },400);
+  },2500);
+}
+
+function animPbar(el,from,to,dur){
+  var start=Date.now();
+  var iv=setInterval(function(){
+    var p=from+((Date.now()-start)/dur)*(to-from);
+    el.style.width=Math.min(p,to)+'%';
+    if(p>=to)clearInterval(iv);
+  },16);
+}
+
+/* ── QR CODE ── */
+window.addEventListener('load',function(){
+  try{
+    new QRCode(document.getElementById('qrcode'),{
+      text:'https://BilouKassa.github.io/mariage-hope-josue',
+      width:160,height:160,
+      colorDark:'#0b1628',colorLight:'#ffffff',
+      correctLevel:QRCode.CorrectLevel.H
+    });
+  }catch(e){}
+});
+</script>
+</body>
+</html>
