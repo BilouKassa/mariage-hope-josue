@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Invités Hope & Josué</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--or:#c9a84c;--bleu:#08111f;--bleu2:#0c1a30;--terra:#c0722a;--texte:#eef4ff;--texte2:#b8cce8;--texte3:#7090b8}
+body{background:var(--bleu);min-height:100vh;font-family:'Cormorant Garamond',serif;color:var(--texte);padding:30px 16px 80px}
+.container{max-width:760px;margin:0 auto}
+
+/* Header */
+.hdr{text-align:center;margin-bottom:32px}
+.hdr h1{font-family:'Playfair Display',serif;font-size:26px;font-weight:400;margin-bottom:6px}
+.hdr p{font-size:13px;color:var(--texte3);font-style:italic}
+
+/* Login */
+.login-box{
+  max-width:360px;margin:60px auto;
+  background:var(--bleu2);border:0.5px solid rgba(201,168,76,0.25);
+  border-radius:4px;padding:32px;text-align:center;
+}
+.login-box h2{font-family:'Playfair Display',serif;font-size:22px;margin-bottom:8px}
+.login-box p{font-size:13px;color:var(--texte3);font-style:italic;margin-bottom:22px}
+.pw-input{
+  width:100%;background:rgba(255,255,255,0.04);border:0.5px solid rgba(201,168,76,0.28);
+  border-radius:2px;padding:12px 16px;font-family:'Cormorant Garamond',serif;font-size:15px;
+  color:var(--texte);outline:none;margin-bottom:14px;
+}
+.pw-input:focus{border-color:var(--or)}
+.pw-input::placeholder{color:#253a55}
+.pw-btn{
+  width:100%;padding:13px;background:linear-gradient(120deg,var(--terra),var(--or) 50%,#e8952e);
+  background-size:200% auto;border:none;border-radius:2px;
+  font-family:'Playfair Display',serif;font-size:12px;letter-spacing:3px;
+  text-transform:uppercase;color:#07101e;cursor:pointer;font-weight:700;
+}
+.pw-err{font-size:12px;color:#f07070;margin-top:10px;display:none}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:28px}
+@media(min-width:500px){.stats-grid{grid-template-columns:repeat(4,1fr)}}
+.stat-card{
+  background:var(--bleu2);border:0.5px solid rgba(201,168,76,0.2);
+  border-radius:3px;padding:16px 14px;text-align:center;
+  position:relative;overflow:hidden;
+}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,transparent,var(--or),transparent)}
+.stat-val{font-family:'Playfair Display',serif;font-size:32px;font-weight:600;line-height:1}
+.stat-val.green{color:#5de09a}
+.stat-val.amber{color:var(--or)}
+.stat-val.red{color:#f07070}
+.stat-val.blue{color:#7ab8f0}
+.stat-lbl{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--texte3);margin-top:6px}
+
+/* Barre de recherche */
+.search-bar{
+  display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;
+}
+.search-inp{
+  flex:1;min-width:200px;
+  background:rgba(255,255,255,0.04);border:0.5px solid rgba(201,168,76,0.22);
+  border-radius:2px;padding:10px 14px;font-family:'Cormorant Garamond',serif;
+  font-size:14px;color:var(--texte);outline:none;
+}
+.search-inp:focus{border-color:var(--or)}
+.search-inp::placeholder{color:#253a55}
+.filter-btn{
+  padding:10px 18px;background:rgba(201,168,76,0.08);
+  border:0.5px solid rgba(201,168,76,0.2);border-radius:2px;
+  font-family:'Cormorant Garamond',serif;font-size:13px;color:var(--texte3);
+  cursor:pointer;transition:all 0.2s;white-space:nowrap;
+}
+.filter-btn.active{background:rgba(201,168,76,0.15);border-color:var(--or);color:var(--or)}
+
+/* Table invités */
+.table-wrap{background:var(--bleu2);border:0.5px solid rgba(201,168,76,0.18);border-radius:4px;overflow:hidden}
+.table-hdr{
+  display:grid;grid-template-columns:1fr 1fr 60px 70px;
+  padding:12px 18px;border-bottom:0.5px solid rgba(201,168,76,0.15);
+  font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--or);
+}
+.guest-row{
+  display:grid;grid-template-columns:1fr 1fr 60px 70px;
+  padding:14px 18px;border-bottom:0.5px solid rgba(255,255,255,0.05);
+  transition:background 0.15s;align-items:center;
+}
+.guest-row:last-child{border-bottom:none}
+.guest-row:hover{background:rgba(201,168,76,0.04)}
+.g-name{font-size:15px;color:var(--texte);font-weight:400}
+.g-date-rsvp{font-size:11px;color:var(--texte3);margin-top:2px}
+.g-presence{font-size:12px;color:var(--texte2);font-style:italic;line-height:1.4}
+.g-nb{font-family:'Playfair Display',serif;font-size:16px;color:var(--or);text-align:center}
+.g-status{text-align:center}
+.badge{
+  display:inline-flex;align-items:center;gap:5px;
+  border-radius:40px;padding:4px 10px;font-size:10px;letter-spacing:1px;
+  text-transform:uppercase;
+}
+.badge.in{background:rgba(34,160,90,0.15);color:#5de09a;border:0.5px solid rgba(34,160,90,0.3)}
+.badge.out{background:rgba(201,168,76,0.1);color:rgba(201,168,76,0.7);border:0.5px solid rgba(201,168,76,0.2)}
+
+/* Vide */
+.empty{text-align:center;padding:40px;color:var(--texte3);font-style:italic;font-size:14px}
+
+/* Refresh btn */
+.refresh-btn{
+  display:flex;align-items:center;gap:8px;margin-left:auto;
+  padding:10px 18px;background:rgba(201,168,76,0.08);
+  border:0.5px solid rgba(201,168,76,0.2);border-radius:2px;
+  font-family:'Cormorant Garamond',serif;font-size:12px;letter-spacing:2px;
+  text-transform:uppercase;color:var(--or);cursor:pointer;transition:background 0.2s;
+}
+.refresh-btn:hover{background:rgba(201,168,76,0.15)}
+
+.loader-ring{
+  width:40px;height:40px;border-radius:50%;
+  border:2px solid rgba(201,168,76,0.1);border-top-color:var(--or);
+  margin:40px auto;animation:spin 0.8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- LOGIN -->
+  <div id="login-section">
+    <div style="text-align:center;margin-bottom:32px">
+      <p style="font-size:10px;letter-spacing:5px;text-transform:uppercase;color:var(--or);margin-bottom:10px">Accès réservé</p>
+      <h1 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:400">Liste des invités</h1>
+      <p style="font-size:13px;color:var(--texte3);font-style:italic;margin-top:6px">Mariage Hope &amp; Josué Exode</p>
+    </div>
+    <div class="login-box">
+      <h2>Accès administrateur</h2>
+      <p>Entrez le mot de passe pour accéder à la liste des invités confirmés.</p>
+      <input class="pw-input" type="password" id="pw-inp" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')login()">
+      <button class="pw-btn" onclick="login()">Accéder à la liste</button>
+      <div class="pw-err" id="pw-err">Mot de passe incorrect.</div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboard" style="display:none">
+    <div class="hdr">
+      <p style="font-size:10px;letter-spacing:5px;text-transform:uppercase;color:var(--or);margin-bottom:10px">Tableau de bord</p>
+      <h1>Liste des invités</h1>
+      <p>Mariage Hope &amp; Josué Exode — 17 &amp; 19 Déc 2026</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card"><div class="stat-val blue" id="s-total">—</div><div class="stat-lbl">Confirmations</div></div>
+      <div class="stat-card"><div class="stat-val amber" id="s-pers">—</div><div class="stat-lbl">Personnes</div></div>
+      <div class="stat-card"><div class="stat-val green" id="s-in">—</div><div class="stat-lbl">Arrivés</div></div>
+      <div class="stat-card"><div class="stat-val red" id="s-out">—</div><div class="stat-lbl">En attente</div></div>
+    </div>
+
+    <!-- Barre contrôles -->
+    <div class="search-bar">
+      <input class="search-inp" id="search-inp" placeholder="Rechercher un invité…" oninput="renderList()">
+      <button class="filter-btn active" id="f-all" onclick="setFilter('all')">Tous</button>
+      <button class="filter-btn" id="f-in" onclick="setFilter('in')">Arrivés</button>
+      <button class="filter-btn" id="f-out" onclick="setFilter('out')">En attente</button>
+      <button class="refresh-btn" onclick="loadGuests()">
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4v5h5M16 16v-5h-5"/><path d="M4 9a8 8 0 0114 0M16 11a8 8 0 01-14 0"/></svg>
+        Actualiser
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <div class="table-hdr">
+        <div>Invité</div><div>Présence</div><div style="text-align:center">Pers.</div><div style="text-align:center">Statut</div>
+      </div>
+      <div id="guest-list"><div class="loader-ring"></div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+var allGuests=[];
+var activeFilter='all';
+var adminPw='';
+
+function login(){
+  var pw=document.getElementById('pw-inp').value.trim();
+  if(!pw){return}
+  adminPw=pw;
+  loadGuests();
+}
+
+function loadGuests(){
+  document.getElementById('login-section').style.display='none';
+  document.getElementById('dashboard').style.display='block';
+  document.getElementById('guest-list').innerHTML='<div class="loader-ring"></div>';
+
+  fetch('/api/guests?pw='+encodeURIComponent(adminPw))
+    .then(function(r){
+      if(r.status===401){
+        document.getElementById('dashboard').style.display='none';
+        document.getElementById('login-section').style.display='block';
+        document.getElementById('pw-err').style.display='block';
+        adminPw='';
+        return null;
+      }
+      return r.json();
+    })
+    .then(function(data){
+      if(!data)return;
+      allGuests=data.guests||[];
+      // Stats
+      document.getElementById('s-total').textContent=data.stats.total;
+      document.getElementById('s-pers').textContent=data.stats.totalPersonnes;
+      document.getElementById('s-in').textContent=data.stats.checkedIn;
+      document.getElementById('s-out').textContent=data.stats.nonCheckedIn;
+      renderList();
+    })
+    .catch(function(){
+      document.getElementById('guest-list').innerHTML='<div class="empty">Erreur de chargement. Réessayez.</div>';
+    });
+}
+
+function setFilter(f){
+  activeFilter=f;
+  ['all','in','out'].forEach(function(k){
+    document.getElementById('f-'+k).classList.toggle('active',k===f);
+  });
+  renderList();
+}
+
+function fmt(iso){
+  var d=new Date(iso);
+  return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+}
+
+function renderList(){
+  var q=(document.getElementById('search-inp').value||'').toLowerCase();
+  var list=allGuests.filter(function(g){
+    var matchQ=!q||g.nom.toLowerCase().includes(q);
+    var matchF=activeFilter==='all'||(activeFilter==='in'&&g.checkedIn)||(activeFilter==='out'&&!g.checkedIn);
+    return matchQ&&matchF;
+  });
+
+  if(!list.length){
+    document.getElementById('guest-list').innerHTML='<div class="empty">Aucun invité trouvé.</div>';
+    return;
+  }
+
+  var html=list.map(function(g){
+    var badge=g.checkedIn
+      ?'<span class="badge in"><svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 6l3 3 5-5"/></svg>Arrivé</span>'
+      :'<span class="badge out">En attente</span>';
+    var ci=g.checkedIn&&g.checkedInAt?'<div class="g-date-rsvp">Arrivé '+fmt(g.checkedInAt)+'</div>':'';
+    return '<div class="guest-row">'
+      +'<div><div class="g-name">'+g.nom+'</div><div class="g-date-rsvp">RSVP '+fmt(g.confirmedAt)+'</div>'+ci+'</div>'
+      +'<div class="g-presence">'+g.presence+'</div>'
+      +'<div class="g-nb">'+g.nb+'</div>'
+      +'<div class="g-status">'+badge+'</div>'
+      +'</div>';
+  }).join('');
+
+  document.getElementById('guest-list').innerHTML=html;
+}
+</script>
+</body>
+</html>
