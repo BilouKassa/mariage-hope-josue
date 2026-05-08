@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Check-in — Mariage Hope & Josué</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--or:#c9a84c;--or2:#e8c46a;--bleu:#08111f;--bleu2:#0c1a30;--terra:#c0722a;--texte:#eef4ff;--texte2:#b8cce8;--texte3:#7090b8}
+html,body{min-height:100%;width:100%;overflow-x:hidden}
+body{background:var(--bleu);font-family:'Cormorant Garamond',Georgia,serif;display:flex;flex-direction:column;align-items:center;padding:0 0 60px;color:var(--texte)}
+#cvs-bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+.hdr{position:relative;z-index:2;width:100%;max-width:500px;text-align:center;padding:28px 20px 0}
+.hdr-badge{display:inline-flex;align-items:center;gap:8px;font-size:10px;letter-spacing:5px;text-transform:uppercase;color:var(--or);margin-bottom:10px}
+.hdr-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:400;margin-bottom:4px}
+.hdr-sub{font-size:13px;color:var(--texte3);font-style:italic}
+.sep{display:flex;align-items:center;gap:12px;margin:18px 0 22px}
+.sep::before,.sep::after{content:'';flex:1;height:0.5px;background:linear-gradient(90deg,transparent,rgba(201,168,76,0.35),transparent)}
+.sep span{color:var(--or);font-size:11px;letter-spacing:6px}
+.zone{position:relative;z-index:2;width:100%;max-width:500px;padding:0 16px}
+.scan-card{background:var(--bleu2);border:1px solid rgba(201,168,76,0.3);border-radius:4px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.scan-header{padding:16px 20px 14px;border-bottom:0.5px solid rgba(201,168,76,0.15);display:flex;align-items:center;justify-content:space-between}
+.scan-title{font-family:'Playfair Display',serif;font-size:16px;color:var(--texte)}
+.dot{width:10px;height:10px;border-radius:50%;background:#22a05a;box-shadow:0 0 8px rgba(34,160,90,0.6);animation:dotP 1.5s ease-in-out infinite}
+.dot.off{background:var(--texte3);box-shadow:none;animation:none}
+@keyframes dotP{0%,100%{opacity:1}50%{opacity:0.4}}
+.viewfinder{position:relative;width:100%;background:#000;overflow:hidden;display:none}
+#video{width:100%;display:block;object-fit:cover}
+#scan-canvas{display:none}
+.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.frame{width:220px;height:220px;position:relative}
+.frame::before{content:'';position:absolute;top:0;left:0;width:36px;height:36px;border-top:3px solid var(--or);border-left:3px solid var(--or);border-radius:3px 0 0 0}
+.frame::after{content:'';position:absolute;top:0;right:0;width:36px;height:36px;border-top:3px solid var(--or);border-right:3px solid var(--or);border-radius:0 3px 0 0}
+.fbl{position:absolute;bottom:0;left:0;width:36px;height:36px;border-bottom:3px solid var(--or);border-left:3px solid var(--or);border-radius:0 0 0 3px}
+.fbr{position:absolute;bottom:0;right:0;width:36px;height:36px;border-bottom:3px solid var(--or);border-right:3px solid var(--or);border-radius:0 0 3px 0}
+.sline{position:absolute;left:4px;right:4px;height:2.5px;background:linear-gradient(90deg,transparent,var(--or),var(--or2),var(--or),transparent);top:0;animation:sl 2s ease-in-out infinite;border-radius:1px;box-shadow:0 0 10px rgba(201,168,76,0.6)}
+@keyframes sl{0%{top:4px;opacity:0}10%{opacity:1}90%{opacity:1}100%{top:212px;opacity:0}}
+.hint{padding:12px 16px;text-align:center;font-size:12px;color:var(--texte3);font-style:italic;border-top:0.5px solid rgba(201,168,76,0.1);display:none;align-items:center;justify-content:center;gap:8px}
+.placeholder{padding:40px 20px;text-align:center}
+.btn-start{width:calc(100% - 32px);margin:16px;padding:15px;background:linear-gradient(120deg,var(--terra),var(--or) 50%,#e8952e);background-size:200% auto;border:none;border-radius:2px;font-family:'Playfair Display',serif;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:#07101e;cursor:pointer;font-weight:700;transition:background-position 0.4s,box-shadow 0.3s;display:flex;align-items:center;justify-content:center;gap:10px}
+.btn-start:hover{background-position:right center;box-shadow:0 6px 20px rgba(201,168,76,0.3)}
+.loader-box{padding:28px 20px;text-align:center;display:none}
+.loader-ring{width:44px;height:44px;border-radius:50%;border:2px solid rgba(201,168,76,0.1);border-top-color:var(--or);margin:0 auto 12px;animation:spin 0.7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-txt{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--texte3)}
+.result{display:none;animation:ri 0.45s cubic-bezier(0.22,1,0.36,1) forwards}
+@keyframes ri{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.band{padding:28px 20px 22px;text-align:center}
+.band.ok{background:linear-gradient(160deg,rgba(34,160,90,0.2),rgba(34,160,90,0.07))}
+.band.nok{background:linear-gradient(160deg,rgba(200,50,50,0.2),rgba(200,50,50,0.07))}
+.ico{width:90px;height:90px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
+.ico.ok{background:rgba(34,160,90,0.15);border:2.5px solid rgba(34,160,90,0.5);animation:pop 0.45s cubic-bezier(0.34,1.56,0.64,1) 0.1s both,pok 2.5s ease 0.6s infinite}
+@keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes pok{0%,100%{box-shadow:0 0 0 8px rgba(34,160,90,0.06),0 0 30px rgba(34,160,90,0.15)}50%{box-shadow:0 0 0 16px rgba(34,160,90,0.04),0 0 50px rgba(34,160,90,0.25)}}
+.ico.nok{background:rgba(200,50,50,0.15);border:2.5px solid rgba(200,50,50,0.5);box-shadow:0 0 0 8px rgba(200,50,50,0.06);animation:pop 0.45s cubic-bezier(0.34,1.56,0.64,1) 0.1s both}
+.cc{stroke-dasharray:63;stroke-dashoffset:63;animation:dc 0.4s ease 0.5s forwards}
+.ct{stroke-dasharray:42;stroke-dashoffset:42;animation:dt 0.35s ease 0.82s forwards}
+@keyframes dc{to{stroke-dashoffset:0}}@keyframes dt{to{stroke-dashoffset:0}}
+.stitle{font-family:'Playfair Display',serif;font-size:28px;margin-bottom:6px;animation:fu 0.4s ease 0.25s both}
+.ssub{font-size:14px;font-style:italic;line-height:1.7;animation:fu 0.4s ease 0.38s both}
+.stitle.ok{color:#5de09a}.ssub.ok{color:rgba(93,224,154,0.75)}
+.stitle.nok{color:#f07070}.ssub.nok{color:rgba(240,112,112,0.75)}
+@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.stripe{height:4px;background:linear-gradient(90deg,var(--bleu2) 0%,var(--terra) 16%,var(--or) 33%,var(--or2) 50%,var(--or) 67%,var(--terra) 84%,var(--bleu2) 100%)}
+.guest{padding:20px 24px;animation:fu 0.5s ease 0.5s both}
+.g-hdr{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--or);margin-bottom:14px;display:block}
+.g-row{display:flex;align-items:flex-start;gap:14px;padding:10px 0;border-bottom:0.5px solid rgba(255,255,255,0.06)}
+.g-row:last-child{border-bottom:none}
+.g-ico{width:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:2px}
+.g-k{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--texte3);min-width:86px;flex-shrink:0;padding-top:2px}
+.g-v{font-size:15px;color:var(--texte);flex:1;line-height:1.5}
+.g-v.it{font-style:italic;color:var(--texte2)}
+.pill{display:inline-flex;align-items:center;background:rgba(201,168,76,0.1);border:0.5px solid rgba(201,168,76,0.3);border-radius:40px;padding:3px 13px;font-family:'Playfair Display',serif;font-size:15px;color:var(--or)}
+.stamp{margin:0 24px 18px;border-radius:3px;padding:10px 15px;display:flex;align-items:center;gap:10px;font-size:12.5px;font-style:italic;animation:fu 0.5s ease 0.65s both;background:rgba(34,160,90,0.08);border:0.5px solid rgba(34,160,90,0.25);color:rgba(93,224,154,0.85)}
+.btn-next{display:flex;align-items:center;justify-content:center;gap:10px;margin:4px 24px 22px;padding:13px;background:linear-gradient(120deg,var(--terra),var(--or) 50%,#e8952e);background-size:200% auto;border:none;border-radius:2px;font-family:'Playfair Display',serif;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#07101e;cursor:pointer;font-weight:700;transition:background-position 0.4s,box-shadow 0.3s;animation:fu 0.5s ease 0.75s both}
+.btn-next:hover{background-position:right center;box-shadow:0 6px 18px rgba(201,168,76,0.3)}
+.footer{position:relative;z-index:2;margin-top:24px;text-align:center;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(201,168,76,0.2)}
+</style>
+</head>
+<body>
+<canvas id="cvs-bg"></canvas>
+<div class="hdr">
+  <div class="hdr-badge">
+    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4M5 3h10a1 1 0 011 1v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4a1 1 0 011-1z"/></svg>
+    Check-in — Entrée
+  </div>
+  <div class="hdr-title">Mariage Hope &amp; Josué Exode</div>
+  <p class="hdr-sub">17 &amp; 19 Décembre 2026 · Libreville, Gabon</p>
+  <div class="sep"><span>✦ ✦ ✦</span></div>
+</div>
+
+<div class="zone">
+<div class="scan-card">
+  <div id="vue-scanner">
+    <div class="scan-header">
+      <span class="scan-title">Scanner le QR code de l'invité</span>
+      <div class="dot off" id="status-dot"></div>
+    </div>
+    <div class="viewfinder" id="viewfinder">
+      <video id="video" playsinline muted autoplay></video>
+      <canvas id="scan-canvas"></canvas>
+      <div class="overlay">
+        <div class="frame">
+          <div class="fbl"></div><div class="fbr"></div>
+          <div class="sline"></div>
+        </div>
+      </div>
+    </div>
+    <div class="placeholder" id="placeholder">
+      <svg width="64" height="64" viewBox="0 0 64 64" fill="none" style="margin:0 auto 16px;display:block;opacity:0.25">
+        <rect x="4" y="4" width="22" height="22" rx="3" stroke="#c9a84c" stroke-width="2"/>
+        <rect x="9" y="9" width="12" height="12" fill="#c9a84c" opacity="0.5" rx="1"/>
+        <rect x="38" y="4" width="22" height="22" rx="3" stroke="#c9a84c" stroke-width="2"/>
+        <rect x="43" y="9" width="12" height="12" fill="#c9a84c" opacity="0.5" rx="1"/>
+        <rect x="4" y="38" width="22" height="22" rx="3" stroke="#c9a84c" stroke-width="2"/>
+        <rect x="9" y="43" width="12" height="12" fill="#c9a84c" opacity="0.5" rx="1"/>
+        <rect x="38" y="38" width="6" height="6" fill="#c9a84c" opacity="0.5" rx="1"/>
+        <rect x="48" y="38" width="6" height="6" fill="#c9a84c" opacity="0.5" rx="1"/>
+        <rect x="38" y="48" width="6" height="6" fill="#c9a84c" opacity="0.5" rx="1"/>
+        <rect x="48" y="48" width="6" height="6" fill="#c9a84c" opacity="0.5" rx="1"/>
+      </svg>
+      <p style="font-size:14px;color:#7090b8;font-style:italic;line-height:1.8">Appuyez sur le bouton ci-dessous<br>pour activer la caméra et scanner<br>le QR code de l'invité</p>
+    </div>
+    <div class="loader-box" id="loader-box">
+      <div class="loader-ring"></div>
+      <p class="loader-txt" id="loader-txt">Lecture du QR code…</p>
+    </div>
+    <div class="hint" id="scan-hint">
+      <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="#c9a84c" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l2 2"/></svg>
+      Pointez la caméra vers le QR code de l'invité
+    </div>
+    <button class="btn-start" id="btn-start" onclick="demarrer()">
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2h6v6H2zM12 2h6v6h-6zM2 12h6v6H2z"/><rect x="12" y="12" width="3" height="3" fill="currentColor"/><rect x="17" y="12" width="3" height="3" fill="currentColor"/><rect x="12" y="17" width="3" height="3" fill="currentColor"/><rect x="17" y="17" width="3" height="3" fill="currentColor"/></svg>
+      Activer la caméra
+    </button>
+  </div>
+
+  <!-- OK -->
+  <div class="result" id="res-ok">
+    <div class="stripe"></div>
+    <div class="band ok">
+      <div class="ico ok">
+        <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
+          <circle class="cc" cx="26" cy="26" r="20" stroke="#5de09a" stroke-width="2.5" fill="none"/>
+          <path class="ct" d="M15 26l8 8 14-15" stroke="#5de09a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+      <div class="stitle ok">Bienvenue !</div>
+      <div class="ssub ok">Présence confirmée — Entrée autorisée ✅</div>
+    </div>
+    <div class="guest">
+      <span class="g-hdr">Informations de l'invité</span>
+      <div class="g-row">
+        <div class="g-ico"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#c9a84c" stroke-width="1.4"><circle cx="10" cy="7" r="3"/><path d="M4 17c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg></div>
+        <span class="g-k">Nom</span><span class="g-v" id="r-nom">—</span>
+      </div>
+      <div class="g-row">
+        <div class="g-ico"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#c9a84c" stroke-width="1.4"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 9h14M8 4V2M12 4V2"/></svg></div>
+        <span class="g-k">Présence</span><span class="g-v it" id="r-presence">—</span>
+      </div>
+      <div class="g-row">
+        <div class="g-ico"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#c9a84c" stroke-width="1.4"><path d="M9 6H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-2M9 6V4a2 2 0 014 0v2M9 6h4"/></svg></div>
+        <span class="g-k">Personnes</span>
+        <span class="g-v"><span class="pill" id="r-nb">—</span></span>
+      </div>
+      <div class="g-row">
+        <div class="g-ico"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#c9a84c" stroke-width="1.4"><path d="M3 5a2 2 0 012-2h2l2 4-1.5 1.5a11 11 0 005 5L14 12l4 2v2a2 2 0 01-2 2A15 15 0 013 5z"/></svg></div>
+        <span class="g-k">WhatsApp</span><span class="g-v" id="r-wa">—</span>
+      </div>
+      <div class="g-row" id="r-msg-row" style="display:none">
+        <div class="g-ico"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#c9a84c" stroke-width="1.4"><path d="M2 5h16v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm0 0l8 6 8-6"/></svg></div>
+        <span class="g-k">Message</span><span class="g-v it" id="r-msg">—</span>
+      </div>
+    </div>
+    <div class="stamp">
+      <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="#5de09a" stroke-width="1.6"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l2 2"/></svg>
+      <span id="r-heure">Check-in enregistré</span>
+    </div>
+    <button class="btn-next" onclick="reset()">
+      <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 2h6v6H2zM12 2h6v6h-6zM2 12h6v6H2z"/></svg>
+      Invité suivant
+    </button>
+  </div>
+
+  <!-- NOK -->
+  <div class="result" id="res-nok">
+    <div class="stripe"></div>
+    <div class="band nok">
+      <div class="ico nok">
+        <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
+          <circle cx="26" cy="26" r="20" stroke="#f07070" stroke-width="2.5" fill="none" opacity="0.7"/>
+          <path d="M17 17l18 18M35 17L17 35" stroke="#f07070" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="stitle nok">Non confirmé ❌</div>
+      <div class="ssub nok">QR code invalide ou non reconnu.<br>Cette personne n'a pas confirmé sa présence.</div>
+    </div>
+    <button class="btn-next" style="margin-top:4px" onclick="reset()">
+      <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 2h6v6H2zM12 2h6v6h-6zM2 12h6v6H2z"/></svg>
+      Scanner à nouveau
+    </button>
+  </div>
+</div>
+</div>
+<div class="footer">Hope &amp; Josué Exode · Décembre 2026</div>
+
+<script>
+var SECRET='HJ2026-xK9#mP!qRnT@vLw$eZuYs3';
+var SB_URL='https://kyttkxddxzligoowxulo.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5dHRreGRkeHpsaWdvb3d4dWxvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNTAyMzEsImV4cCI6MjA5MzcyNjIzMX0.T-O-Bc1rSN-BHAT94jajTbb7WSBiX4UNUMxaocS4sBM';
+
+/* Particules */
+(function(){
+  var c=document.getElementById('cvs-bg'),ctx=c.getContext('2d'),pts=[];
+  function rs(){c.width=window.innerWidth;c.height=window.innerHeight}
+  rs();window.addEventListener('resize',rs);
+  function mk(){return{x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.4+0.3,vx:(Math.random()-0.5)*0.18,vy:-(Math.random()*0.32+0.06),op:Math.random()*0.45+0.1,fade:Math.random()*0.003+0.001,g:Math.random()>0.5}}
+  for(var i=0;i<80;i++)pts.push(mk());
+  function draw(){ctx.clearRect(0,0,c.width,c.height);pts.forEach(function(p,i){p.x+=p.vx;p.y+=p.vy;p.op-=p.fade;if(p.op<=0||p.y<-10){pts[i]=mk();pts[i].y=c.height+5;return}ctx.save();ctx.globalAlpha=p.op;ctx.fillStyle=p.g?'#c9a84c':'#fff';ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();ctx.restore()});requestAnimationFrame(draw);}
+  draw();
+})();
+
+var stream=null,scanInterval=null,scanning=false;
+
+async function demarrer(){
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}});
+    var v=document.getElementById('video');v.srcObject=stream;await v.play();
+    document.getElementById('placeholder').style.display='none';
+    document.getElementById('btn-start').style.display='none';
+    document.getElementById('viewfinder').style.display='block';
+    document.getElementById('scan-hint').style.display='flex';
+    document.getElementById('status-dot').classList.remove('off');
+    scanning=true;scanInterval=setInterval(lireCadre,200);
+  }catch(e){alert("Impossible d'accéder à la caméra. Autorisez l'accès dans les paramètres.");}
+}
+
+function lireCadre(){
+  if(!scanning)return;
+  var v=document.getElementById('video'),c=document.getElementById('scan-canvas');
+  if(v.readyState!==v.HAVE_ENOUGH_DATA)return;
+  c.width=v.videoWidth;c.height=v.videoHeight;
+  var ctx=c.getContext('2d');ctx.drawImage(v,0,0,c.width,c.height);
+  var img=ctx.getImageData(0,0,c.width,c.height);
+  var code=jsQR(img.data,img.width,img.height,{inversionAttempts:'dontInvert'});
+  if(code&&code.data){
+    scanning=false;clearInterval(scanInterval);
+    traiterQR(code.data);
+  }
+}
+
+function traiterQR(qrData){
+  arreter();
+  document.getElementById('viewfinder').style.display='none';
+  document.getElementById('scan-hint').style.display='none';
+  document.getElementById('loader-box').style.display='block';
+  document.getElementById('loader-txt').textContent='Vérification en cours…';
+
+  // Extraire le paramètre q= (données encodées) depuis l'URL du QR
+  var q=null;
+  try{var u=new URL(qrData);q=u.searchParams.get('q');}catch(e){}
+
+  if(!q){
+    document.getElementById('loader-box').style.display='none';
+    afficherNOK();return;
+  }
+
+  // Décoder les données directement depuis le QR (pas de réseau)
+  try{
+    var json=decodeURIComponent(escape(atob(q)));
+    var payload=JSON.parse(json);
+    // Vérifier les champs obligatoires
+    if(!payload.n||!payload.p){
+      document.getElementById('loader-box').style.display='none';
+      afficherNOK();return;
+    }
+    document.getElementById('loader-box').style.display='none';
+    afficherOK(payload);
+    // Marquer dans Supabase en arrière-plan (non bloquant)
+    if(payload.t){marquerCheckin(payload.t);}
+  }catch(e){
+    document.getElementById('loader-box').style.display='none';
+    afficherNOK();
+  }
+}
+
+// Marquer l'invité comme arrivé dans Supabase (background)
+function marquerCheckin(token){
+  try{
+    fetch(SB_URL+'/rest/v1/rsvp?signature=eq.'+encodeURIComponent(token),{
+      method:'PATCH',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({checked_in:true,checked_in_at:new Date().toISOString()})
+    }).catch(function(){});// silencieux si CORS
+  }catch(e){}
+}
+
+function afficherOK(p){
+  document.getElementById('vue-scanner').style.display='none';
+  document.getElementById('res-nok').style.display='none';
+  document.getElementById('res-ok').style.display='block';
+  document.getElementById('r-nom').textContent=p.n||'—';
+  document.getElementById('r-presence').textContent=p.p||'—';
+  var nb=parseInt(p.nb)||1;
+  document.getElementById('r-nb').textContent=nb+' personne'+(nb>1?'s':'');
+  document.getElementById('r-wa').textContent=p.w||'—';
+  if(p.m){document.getElementById('r-msg').textContent=p.m;document.getElementById('r-msg-row').style.display='flex';}
+  var now=new Date();
+  document.getElementById('r-heure').textContent='Check-in à '+now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function afficherNOK(){
+  document.getElementById('vue-scanner').style.display='none';
+  document.getElementById('res-ok').style.display='none';
+  document.getElementById('res-nok').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function reset(){
+  document.getElementById('res-ok').style.display='none';
+  document.getElementById('res-nok').style.display='none';
+  document.getElementById('r-msg-row').style.display='none';
+  document.getElementById('vue-scanner').style.display='block';
+  document.getElementById('loader-box').style.display='none';
+  document.getElementById('placeholder').style.display='none';
+  document.getElementById('btn-start').style.display='none';
+  document.getElementById('viewfinder').style.display='block';
+  document.getElementById('scan-hint').style.display='flex';
+  document.getElementById('status-dot').classList.remove('off');
+  demarrer();
+}
+
+function arreter(){if(stream){stream.getTracks().forEach(function(t){t.stop()});stream=null;}clearInterval(scanInterval);}
+
+// Si ouverture directe via URL (lien WhatsApp)
+window.addEventListener('load',function(){
+  var params=new URLSearchParams(window.location.search);
+  var q=params.get('q');
+  if(q){
+    document.getElementById('placeholder').style.display='none';
+    document.getElementById('btn-start').style.display='none';
+    document.getElementById('loader-box').style.display='block';
+    try{
+      var json=decodeURIComponent(escape(atob(q)));
+      var payload=JSON.parse(json);
+      document.getElementById('loader-box').style.display='none';
+      if(payload.n&&payload.p){
+        afficherOK(payload);
+        if(payload.t){marquerCheckin(payload.t);}
+      }else{afficherNOK();}
+      document.getElementById('vue-scanner').style.display='none';
+    }catch(e){
+      document.getElementById('loader-box').style.display='none';
+      afficherNOK();
+      document.getElementById('vue-scanner').style.display='none';
+    }
+  }
+});
+</script>
+</body>
+</html>
